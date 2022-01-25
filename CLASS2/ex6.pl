@@ -5,6 +5,7 @@ invert([], List2, List2) :- !.
 invert([H | List1], List2, Acc) :-
     invert(List1, List2, [H | Acc]).
 
+del_one(_, [], []) :- !.
 del_one(Elem, [Elem | List1], List1) :- !.
 del_one(Elem, [X | List1], [X | List2]) :-
     del_one(Elem, List1, List2).
