@@ -38,24 +38,15 @@ find_flights(Origin, Destination, Visited, [Code | Flights]) :-
     \+ member(Z, Visited),
     find_flights(Z, Destination, [Z | Visited], Flights).
 
-% find_flight(X) :-
-%     flight(X,_,_, _,_,_).
-% find_flight(Y) :-
-%     flight(_, Y,_,_,_,_).
+find_flights_breadth(Origin, Destination, Flights) :-
+    find_flights_breadth([[Origin]], Destination, [], Flights).
 
-
-% get_all_nodes(ListOfAirports) :-
-%     setof(Flight, find_flight(Flight), ListOfAirports).
-
-% company ()
-
-% most_diversified(Company, C/Res) :-
-%     setof(B, A^C^D^E^(flight(A,B,X,C,D,E);flight(B,A,X,C,D,E)), Res),
-
-
-
-% dfs(Origin, Destination, Middle) :-
-
-
-% find_flights(Origin, Destination, Flights) :-
-    
+find_flights_breadth([[Destination | Parents] | _], Destination, _, Parents) :- !.
+find_flights_breadth([[Child | Parents] | Queue], Destination, Visited, Flights) :-
+    findall([Next, Code | Parents], (
+        flight(Child, Next, _, Code, _, _),
+        \+ member(Next, Visited),
+        \+ member([Next | _], [[Child | _] | Queue])
+    ), NextQueue),
+    append(Queue, NextQueue, NewQueue),
+    find_flights_breadth(NewQueue, Destination, [Child | Visited], Flights).
