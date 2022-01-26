@@ -21,8 +21,22 @@ airport(Airport) :-
 get_all_nodes(ListOfAirports) :-
     setof(Airport, airport(Airport), ListOfAirports).
 
-most_diversified(Company, L) :-
-    bagof(Destination, flight(_, Destination, Company, _, _, _), L).
+company_destinations(Company, Destinations) :-
+    setof(Destination, S^C^H^D^flight(S, Destination, Company, C, H, D), List),
+    length(List, Dest),
+    Destinations is -Dest.
+
+most_diversified(Company) :-
+    setof(Destinations-Cmp, company_destinations(Cmp, Destinations), [_D-Company | _]).
+
+find_flights(Origin, Destination, Flights) :-
+    find_flights(Origin, Destination, [Origin], Flights).
+
+find_flights(Destination, Destination, _, []) :- !.
+find_flights(Origin, Destination, Visited, [Code | Flights]) :-
+    flight(Origin, Z, _, Code, _, _),
+    \+ member(Z, Visited),
+    find_flights(Z, Destination, [Z | Visited], Flights).
 
 % find_flight(X) :-
 %     flight(X,_,_, _,_,_).

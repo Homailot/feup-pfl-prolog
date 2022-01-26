@@ -8,10 +8,10 @@ person(Person) :- female(Person).
 
 add_person :-
     repeat,
-    format('~s', ["Are you male or female, any other answers are wrong: "]),
+    format('~s', ["Are you male or female: "]),
     read(Gender),
     valid_gender(Gender), !,
-    format('~s', ["Please give me your name, useless member of society: "]),
+    format('~s', ["Please give me your name: "]),
     read(Name),
     add_person(Gender, Name).
 
@@ -22,10 +22,10 @@ add_person('female', Name) :-
 
 add_parent(Person) :-
     repeat,
-    format('~s', ["male or female, any other answers are wrong: "]),
+    format('~s', ["male or female: "]),
     read(Gender),
     valid_gender(Gender), !,
-    format('~s', ["Please give me name, useless member of society: "]),
+    format('~s', ["Please give me name: "]),
     read(Name),
     add_person(Gender, Name),
     assert(parent(Name, Person)).

@@ -6,7 +6,6 @@ read_until([]) :-
     C == '\n', !,
     get_char(_).
 
-read_until(String) :-
+read_until([C | Rest]) :-
     get_char(C),
-    String = [C | Rest],
     read_until(Rest).
