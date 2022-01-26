@@ -1,3 +1,5 @@
+:- use_module(library(lists)).
+
 %flight(origin, destination, company, code, hour, duration)
 flight(porto, lisbon, tap, tp1949, 1615, 60). 
 flight(lisbon, madrid, tap, tp1018, 1805, 75). 
@@ -41,7 +43,7 @@ find_flights(Origin, Destination, Visited, [Code | Flights]) :-
 find_flights_breadth(Origin, Destination, Flights) :-
     find_flights_breadth([[Origin]], Destination, [], Flights).
 
-find_flights_breadth([[Destination | Parents] | _], Destination, _, Parents) :- !.
+find_flights_breadth([[Destination | Parents] | _], Destination, _, Flights) :- reverse(Parents, Flights), !.
 find_flights_breadth([[Child | Parents] | Queue], Destination, Visited, Flights) :-
     findall([Next, Code | Parents], (
         flight(Child, Next, _, Code, _, _),
@@ -50,3 +52,39 @@ find_flights_breadth([[Child | Parents] | Queue], Destination, Visited, Flights)
     ), NextQueue),
     append(Queue, NextQueue, NewQueue),
     find_flights_breadth(NewQueue, Destination, [Child | Visited], Flights).
+
+find_all_flights(Origin, Destination, ListOfFlights) :-
+    findall(Codes, find_flights(Origin, Destination, Codes), ListOfFlights).
+
+find_flights_least_stops(Origin, Destination, ListOfFlights) :-
+    bagof(Codes, (
+        find_flights(Origin, Destination, Codes),
+        length(Codes, _)
+    ), ListOfFlights), !.
+
+find_flights_stops(Origin, Destination, Stops, ListOfFlights) :-
+    findall(Flights, find_flights_stops_dfs(Origin, Destination, Stops, Flights), ListOfFlights).
+
+find_flights_stops_dfs(Origin, Destination, Stops, Flights) :-
+    find_flights_stops_dfs(Origin, Destination, Stops, [Origin], Flights).
+
+find_flights_stops_dfs(Destination, Destination, _, _, []) :- !.
+find_flights_stops_dfs(Origin, Destination, Stops, Visited, [Code | Flights]) :-
+    flight(Origin, Next, _, Code, _, _),
+    \+ member(Next, Visited),
+    (Next == Destination;  member(Next, Stops)),
+    find_flights_stops_dfs(Next, Destination, Stops, [Next | Visited], Flights).
+
+find_circular_trips(MaxSize, Origin, Cycles) :-
+    bagof(Cycle, find_circular_trips_dfs(MaxSize, Origin, Cycle), Cycles). % used bagof so it returns no instead of empty list.
+
+find_circular_trips_dfs(MaxSize, Origin, Cycle) :-
+    find_circular_trips_dfs(MaxSize, Origin, Origin, Cycle).
+
+find_circular_trips_dfs(_, Origin, Origin, []).
+find_circular_trips_dfs(0, _, _, []) :- !, fail.
+find_circular_trips_dfs(MaxSize, Origin, Current, [Code | Cycle]) :-
+    MaxSize > 0,
+    flight(Current, Next, _, Code, _, _),
+    NextSize is MaxSize - 1,
+    find_circular_trips_dfs(NextSize, Origin, Next, Cycle).
